@@ -93,16 +93,14 @@ class RWMB_Taxonomy_Advanced_Field extends RWMB_Taxonomy_Field {
 	public static function get_value( $field, $args = array(), $post_id = null ) {
 		$value = RWMB_Field::get_value( $field, $args, $post_id );
 		if ( ! $field['clone'] ) {
-			$value = self::call( 'terms_info', $field, $value, $args );
-		} else {
-			$return = array();
-			foreach ( $value as $subvalue ) {
-				$return[] = self::call( 'terms_info', $field, $subvalue, $args );
-			}
-			$value = $return;
+			return static::terms_info( $field, $value, $args );
 		}
 
-		return $value;
+		$return = array();
+		foreach ( $value as $subvalue ) {
+			$return[] = static::terms_info( $field, $subvalue, $args );
+		}
+		return $return;
 	}
 
 	/**
