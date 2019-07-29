@@ -87,7 +87,7 @@ class RWMB_Media_Field extends RWMB_File_Field {
 	 * @return string
 	 */
 	public static function html( $meta, $field ) {
-		$attributes = self::call( 'get_attributes', $field, $meta );
+		$attributes = static::get_attributes( $field, $meta );
 
 		$html = sprintf(
 			'<input %s data-options="%s">',

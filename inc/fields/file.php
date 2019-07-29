@@ -131,7 +131,7 @@ class RWMB_File_Field extends RWMB_Field {
 		foreach ( (array) $files as $k => $file ) {
 			// Ignore deleted files (if users accidentally deleted files or uses `force_delete` without saving post).
 			if ( get_attached_file( $file ) || $field['upload_dir'] ) {
-				$output .= self::call( $field, 'file_html', $file, $k );
+				$output .= static::file_html( $file, $k, $field );
 			}
 		}
 
@@ -383,11 +383,11 @@ class RWMB_File_Field extends RWMB_Field {
 	public static function get_value( $field, $args = array(), $post_id = null ) {
 		$value = parent::get_value( $field, $args, $post_id );
 		if ( ! $field['clone'] ) {
-			$value = self::call( 'files_info', $field, $value, $args );
+			$value = static::files_info( $field, $value, $args );
 		} else {
 			$return = array();
 			foreach ( $value as $subvalue ) {
-				$return[] = self::call( 'files_info', $field, $subvalue, $args );
+				$return[] = static::files_info( $field, $subvalue, $args );
 			}
 			$value = $return;
 		}
@@ -408,7 +408,7 @@ class RWMB_File_Field extends RWMB_Field {
 	public static function files_info( $field, $files, $args ) {
 		$return = array();
 		foreach ( (array) $files as $file ) {
-			$info = self::call( $field, 'file_info', $file, $args );
+			$info = static::files_info( $field, $file, $args );
 			if ( $info ) {
 				$return[ $file ] = $info;
 			}
