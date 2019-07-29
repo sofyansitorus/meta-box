@@ -34,7 +34,7 @@ abstract class RWMB_Input_Field extends RWMB_Field {
 			$output .= '<span class="rwmb-input-group-prepend">' . esc_html( $field['prepend'] ) . '</span>';
 		}
 
-		$attributes = self::call( 'get_attributes', $field, $meta );
+		$attributes = static::get_attributes( $field, $meta );
 		$output    .= sprintf( '<input %s>%s', self::render_attributes( $attributes ), self::datalist( $field ) );
 
 		if ( $field['append'] ) {
