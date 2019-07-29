@@ -18,7 +18,7 @@ abstract class RWMB_Object_Choice_Field extends RWMB_Choice_Field {
 	 * @param int   $post_id Post ID.
 	 */
 	public static function show( $field, $saved, $post_id = 0 ) {
-		$field['options'] = self::call( $field, 'query' );
+		$field['options'] = static::query( $field );
 
 		parent::show( $field, $saved, $post_id );
 	}
@@ -34,7 +34,7 @@ abstract class RWMB_Object_Choice_Field extends RWMB_Choice_Field {
 		$html = call_user_func( array( self::get_type_class( $field ), 'html' ), $meta, $field );
 
 		if ( $field['add_new'] ) {
-			$html .= self::call( 'add_new_form', $field );
+			$html .= static::add_new_form( $field );
 		}
 
 		return $html;
