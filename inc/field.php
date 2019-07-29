@@ -34,10 +34,10 @@ abstract class RWMB_Field {
 	 * @param int   $post_id Post ID.
 	 */
 	public static function show( $field, $saved, $post_id = 0 ) {
-		$meta = self::call( $field, 'meta', $post_id, $saved );
+		$meta = static::meta( $post_id, $saved, $field );
 		$meta = self::filter( 'field_meta', $meta, $field, $saved );
 
-		$begin = self::call( $field, 'begin_html', $meta );
+		$begin = static::begin_html( $meta, $field );
 		$begin = self::filter( 'begin_html', $begin, $field, $meta );
 
 		// Separate code for cloneable and non-cloneable fields to make easy to maintain.
@@ -45,11 +45,11 @@ abstract class RWMB_Field {
 			$field_html = RWMB_Clone::html( $meta, $field );
 		} else {
 			// Call separated methods for displaying each type of field.
-			$field_html = self::call( $field, 'html', $meta );
+			$field_html = static::html( $meta, $field );
 			$field_html = self::filter( 'html', $field_html, $field, $meta );
 		}
 
-		$end = self::call( $field, 'end_html', $meta );
+		$end = static::end_html( $meta, $field );
 		$end = self::filter( 'end_html', $end, $field, $meta );
 
 		$html = self::filter( 'wrapper_html', "$begin$field_html$end", $field, $meta );
@@ -126,7 +126,7 @@ abstract class RWMB_Field {
 	 * @return string
 	 */
 	public static function end_html( $meta, $field ) {
-		return RWMB_Clone::add_clone_button( $field ) . self::call( 'input_description', $field ) . '</div>';
+		return RWMB_Clone::add_clone_button( $field ) . static::input_description( $field ) . '</div>';
 	}
 
 	/**
@@ -203,7 +203,7 @@ abstract class RWMB_Field {
 		}
 
 		// Get raw meta.
-		$meta = self::call( $field, 'raw_meta', $post_id );
+		$meta = static::raw_meta( $post_id, $field );
 
 		// Use $field['std'] only when the meta box hasn't been saved (i.e. the first time we run).
 		$meta = ! $saved ? $field['std'] : $meta;
@@ -218,7 +218,7 @@ abstract class RWMB_Field {
 			}
 		}
 		// Escape attributes.
-		$meta = self::call( $field, 'esc_meta', $meta );
+		$meta = static::esc_meta( $meta );
 
 		// Make sure meta value is an array for clonable and multiple fields.
 		if ( $field['clone'] || $field['multiple'] ) {
@@ -427,7 +427,7 @@ abstract class RWMB_Field {
 		}
 
 		// Get raw meta value in the database, no escape.
-		$value = self::call( $field, 'raw_meta', $post_id, $args );
+		$value = static::raw_meta( $post_id, $field, $args );
 
 		// Make sure meta value is an array for cloneable and multiple fields.
 		if ( $field['clone'] || $field['multiple'] ) {
@@ -455,13 +455,13 @@ abstract class RWMB_Field {
 	 * @return string HTML output of the field
 	 */
 	public static function the_value( $field, $args = array(), $post_id = null ) {
-		$value = self::call( 'get_value', $field, $args, $post_id );
+		$value = static::get_value( $field, $args, $post_id );
 
 		if ( false === $value ) {
 			return '';
 		}
 
-		return self::call( 'format_value', $field, $value, $args, $post_id );
+		return static::format_value( $field, $value, $args, $post_id );
 	}
 
 	/**
@@ -476,11 +476,11 @@ abstract class RWMB_Field {
 	 */
 	public static function format_value( $field, $value, $args, $post_id ) {
 		if ( ! $field['clone'] ) {
-			return self::call( 'format_clone_value', $field, $value, $args, $post_id );
+			return static::format_clone_value( $field, $value, $args, $post_id );
 		}
 		$output = '<ul>';
 		foreach ( $value as $clone ) {
-			$output .= '<li>' . self::call( 'format_clone_value', $field, $clone, $args, $post_id ) . '</li>';
+			$output .= '<li>' . static::format_clone_value( $field, $clone, $args, $post_id ) . '</li>';
 		}
 		$output .= '</ul>';
 		return $output;
@@ -498,11 +498,11 @@ abstract class RWMB_Field {
 	 */
 	public static function format_clone_value( $field, $value, $args, $post_id ) {
 		if ( ! $field['multiple'] ) {
-			return self::call( 'format_single_value', $field, $value, $args, $post_id );
+			return static::format_single_value( $field, $value, $args, $post_id );
 		}
 		$output = '<ul>';
 		foreach ( $value as $single ) {
-			$output .= '<li>' . self::call( 'format_single_value', $field, $single, $args, $post_id ) . '</li>';
+			$output .= '<li>' . static::format_single_value( $field, $single, $args, $post_id ) . '</li>';
 		}
 		$output .= '</ul>';
 		return $output;
