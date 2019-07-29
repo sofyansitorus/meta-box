@@ -144,7 +144,7 @@ class RWMB_Datetime_Field extends RWMB_Text_Field {
 		}
 
 		if ( $field['save_format'] ) {
-			$date = DateTime::createFromFormat( self::call( 'translate_format', $field ), $new );
+			$date = DateTime::createFromFormat( static::translate_format( $field ), $new );
 			$new  = false === $date ? $new : $date->format( $field['save_format'] );
 		}
 
@@ -173,7 +173,7 @@ class RWMB_Datetime_Field extends RWMB_Text_Field {
 		}
 
 		$date = DateTime::createFromFormat( $field['save_format'], $meta );
-		$meta = false === $date ? $meta : $date->format( self::call( 'translate_format', $field ) );
+		$meta = false === $date ? $meta : $date->format( static::translate_format( $field ) );
 
 		return $meta;
 	}
@@ -194,7 +194,7 @@ class RWMB_Datetime_Field extends RWMB_Text_Field {
 		}
 		return array(
 			'timestamp' => $meta ? $meta : null,
-			'formatted' => $meta ? date( self::call( 'translate_format', $field ), intval( $meta ) ) : '',
+			'formatted' => $meta ? date( static::translate_format( $field ), intval( $meta ) ) : '',
 		);
 	}
 
