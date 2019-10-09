@@ -19,7 +19,7 @@ abstract class RWMB_Object_Choice_Field extends RWMB_Choice_Field {
 	 */
 	public static function show( $field, $saved, $post_id = 0 ) {
 		// Get unique saved IDs for ajax fields.
-		$meta = self::call( $field, 'meta', $post_id, $saved );
+		$meta = static::meta( $post_id, $saved, $field );
 		$meta = self::filter( 'field_meta', $meta, $field, $saved );
 		$meta = RWMB_Helpers_Array::flatten( (array) $meta );
 		$meta = array_unique( array_filter( array_map( 'absint', $meta ) ) );
