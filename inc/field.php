@@ -65,7 +65,7 @@ abstract class RWMB_Field {
 
 		$outer_html = sprintf(
 			$field['before'] . '<div class="%s">%s</div>' . $field['after'],
-			trim( $classes ),
+			esc_attr( trim( $classes ) ),
 			$html
 		);
 		$outer_html = self::filter( 'outer_html', $outer_html, $field, $meta );
@@ -247,6 +247,28 @@ abstract class RWMB_Field {
 	}
 
 	/**
+	 * Process the submitted value before saving into the database.
+	 *
+	 * @param mixed $value     The submitted value.
+	 * @param int   $object_id The object ID.
+	 * @param array $field     The field settings.
+	 */
+	public static function process_value( $value, $object_id, $field ) {
+		$old_value = self::call( $field, 'raw_meta', $object_id );
+
+		// Allow field class change the value.
+		if ( $field['clone'] ) {
+			$value = RWMB_Clone::value( $value, $old_value, $object_id, $field );
+		} else {
+			$value = self::call( $field, 'value', $value, $old_value, $object_id );
+			$value = self::filter( 'sanitize', $value, $field, $old_value, $object_id );
+		}
+		$value = self::filter( 'value', $value, $field, $old_value, $object_id );
+
+		return $value;
+	}
+
+	/**
 	 * Set value of meta before saving into database.
 	 *
 	 * @param mixed $new     The submitted meta value.
@@ -314,6 +336,7 @@ abstract class RWMB_Field {
 			array(
 				'id'                => '',
 				'name'              => '',
+				'type'              => 'text',
 				'label_description' => '',
 				'multiple'          => false,
 				'std'               => '',
@@ -337,8 +360,15 @@ abstract class RWMB_Field {
 				'required'          => false,
 				'autofocus'         => false,
 				'attributes'        => array(),
+
+				'sanitize_callback' => null,
 			)
 		);
+
+		// Store the original ID to run correct filters for the clonable field.
+		if ( $field['clone'] ) {
+			$field['_original_id'] = $field['id'];
+		}
 
 		if ( $field['clone_default'] ) {
 			$field['attributes'] = wp_parse_args(
@@ -574,8 +604,9 @@ abstract class RWMB_Field {
 			'rwmb_' . $name,
 			'rwmb_' . $field['type'] . '_' . $name,
 		);
-		if ( isset( $field['id'] ) ) {
-			$filters[] = 'rwmb_' . $field['id'] . '_' . $name;
+		if ( $field['id'] ) {
+			$field_id  = $field['clone'] ? $field['_original_id'] : $field['id'];
+			$filters[] = 'rwmb_' . $field_id . '_' . $name;
 		}
 
 		// Filter params: value, field, other params. Note: value is changed after each run.

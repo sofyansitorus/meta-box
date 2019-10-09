@@ -18,7 +18,7 @@ class RWMB_Loader {
 	 */
 	protected function constants() {
 		// Script version, used to add version for scripts and styles.
-		define( 'RWMB_VER', '5.0.1' );
+		define( 'RWMB_VER', '5.2.1' );
 
 		list( $path, $url ) = self::get_path( dirname( dirname( __FILE__ ) ) );
 
@@ -88,16 +88,11 @@ class RWMB_Loader {
 		$core = new RWMB_Core();
 		$core->init();
 
-		if ( is_admin() ) {
-			$about = new RWMB_About();
-			$about->init();
-		}
-
 		// Validation module.
 		new RWMB_Validation();
 
-		$sanitize = new RWMB_Sanitizer();
-		$sanitize->init();
+		$sanitizer = new RWMB_Sanitizer();
+		$sanitizer->init();
 
 		$media_modal = new RWMB_Media_Modal();
 		$media_modal->init();
@@ -107,10 +102,18 @@ class RWMB_Loader {
 		$wpml->init();
 
 		// Update.
-		$update_checker = new RWMB_Update_Checker();
+		$update_option  = new RWMB_Update_Option();
+		$update_checker = new RWMB_Update_Checker( $update_option );
 		$update_checker->init();
-		$update_settings = new RWMB_Update_Settings( $update_checker );
+		$update_settings = new RWMB_Update_Settings( $update_checker, $update_option );
 		$update_settings->init();
+		$update_notification = new RWMB_Update_Notification( $update_checker, $update_option );
+		$update_notification->init();
+
+		if ( is_admin() ) {
+			$about = new RWMB_About( $update_checker );
+			$about->init();
+		}
 
 		// Public functions.
 		require_once RWMB_INC_DIR . 'functions.php';
