@@ -42,26 +42,68 @@ class RWMB_Loader {
 	 */
 	public static function get_path( $path = '' ) {
 		// Plugin base path.
-		$path       = wp_normalize_path( untrailingslashit( $path ) );
-		$themes_dir = wp_normalize_path( untrailingslashit( dirname( get_stylesheet_directory() ) ) );
+		$path = untrailingslashit( wp_normalize_path( $path ) );
 
-		// Default URL.
-		$url = plugins_url( '', $path . '/' . basename( $path ) . '.php' );
+		if ( self::is_as_plugin() ) {
+			$url = untrailingslashit( plugins_url( '', $path . '/' . basename( $path ) . '.php' ) );
+		} else {
+			$path_split = explode( '/' . get_template() . '/', trailingslashit( $path ) );
+			$path_index = count( $path_split ) - 1;
 
-		// Included into themes.
-		if (
-			0 !== strpos( $path, wp_normalize_path( WP_PLUGIN_DIR ) )
-			&& 0 !== strpos( $path, wp_normalize_path( WPMU_PLUGIN_DIR ) )
-			&& 0 === strpos( $path, $themes_dir )
-		) {
-			$themes_url = untrailingslashit( dirname( get_stylesheet_directory_uri() ) );
-			$url        = str_replace( $themes_dir, $themes_url, $path );
+			if ( self::is_as_child_theme() ) {
+				$url = trailingslashit( get_stylesheet_directory_uri() ) . trim( $path_split[ $path_index ], '/' );
+			} else {
+				$url = trailingslashit( get_template_directory_uri() ) . trim( $path_split[ $path_index ], '/' );
+			}
 		}
 
 		$path = trailingslashit( $path );
 		$url  = trailingslashit( $url );
 
 		return array( $path, $url );
+	}
+
+	/**
+	 * Check if integrated as plugin.
+	 *
+	 * @return bool
+	 */
+	public static function is_as_plugin() {
+		return self::is_as_theme() || self::is_as_child_theme() ? false : true;
+	}
+
+	/**
+	 * Check if integrated as theme.
+	 *
+	 * @return bool
+	 */
+	public static function is_as_theme() {
+		if ( defined( 'TEMPLATEPATH' ) && ! self::is_child_theme_active() && 0 === strpos( wp_normalize_path( __FILE__ ), wp_normalize_path( get_template_directory() ) ) ) {
+			return true;
+		}
+
+		return ! self::is_child_theme_active() && false !== strpos( wp_normalize_path( __FILE__ ), '/' . get_template() . '/' );
+	}
+
+	/**
+	 * Check if integrated as child theme.
+	 *
+	 * @return bool
+	 */
+	public static function is_as_child_theme() {
+		if (  defined( 'STYLESHEETPATH' ) && self::is_child_theme_active() && 0 === strpos( wp_normalize_path( __FILE__ ), wp_normalize_path( get_stylesheet_directory() ) ) ) {
+			return true;
+		}
+
+		return self::is_child_theme_active() && false !== strpos( wp_normalize_path( __FILE__ ), '/' . get_template() . '/' );
+	}
+
+	public static function is_child_theme_active() {
+		if ( ! defined( 'TEMPLATEPATH' ) ||  ! defined( 'STYLESHEETPATH' )  ) {
+			return false;
+		}
+
+		return TEMPLATEPATH !== STYLESHEETPATH;
 	}
 
 	/**
