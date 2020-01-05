@@ -42,7 +42,7 @@ class RWMB_Loader {
 	 */
 	public static function get_path( $path = '' ) {
 		// Plugin base path.
-		$path = untrailingslashit( wp_normalize_path( $path ) );
+		$path = wp_normalize_path( untrailingslashit( $path ) );
 
 		if ( self::is_as_plugin() ) {
 			$url = untrailingslashit( plugins_url( '', $path . '/' . basename( $path ) . '.php' ) );
@@ -91,15 +91,20 @@ class RWMB_Loader {
 	 * @return bool
 	 */
 	public static function is_as_child_theme() {
-		if (  defined( 'STYLESHEETPATH' ) && self::is_child_theme_active() && 0 === strpos( wp_normalize_path( __FILE__ ), wp_normalize_path( get_stylesheet_directory() ) ) ) {
+		if ( defined( 'STYLESHEETPATH' ) && self::is_child_theme_active() && 0 === strpos( wp_normalize_path( __FILE__ ), wp_normalize_path( get_stylesheet_directory() ) ) ) {
 			return true;
 		}
 
 		return self::is_child_theme_active() && false !== strpos( wp_normalize_path( __FILE__ ), '/' . get_template() . '/' );
 	}
 
+	/**
+	 * Whether a child theme is in use.
+	 *
+	 * @return bool
+	 */
 	public static function is_child_theme_active() {
-		if ( ! defined( 'TEMPLATEPATH' ) ||  ! defined( 'STYLESHEETPATH' )  ) {
+		if ( ! defined( 'TEMPLATEPATH' ) || ! defined( 'STYLESHEETPATH' ) ) {
 			return false;
 		}
 
